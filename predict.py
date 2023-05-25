@@ -11,59 +11,26 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 
 def tsne_data(tsne_list, labels, save_path):
-    for i in range(len(tsne_list)):
-        tsne_list[i][0] = tsne_list[i][0][:, :, 0]
-        tsne_list[i][0] = rearrange(tsne_list[i][0], 'b c l -> b (l c)')
-        tsne_list[i][0] = tsne_list[i][0].cpu().numpy()
-    global1_tsne = tsne_list[0][0]
-    global2_tsne = tsne_list[1][0]
-    global3_tsne = tsne_list[2][0]
-    global4_tsne = tsne_list[3][0]
-    fd1_tsne = tsne_list[4][0]
-    fd2_tsne = tsne_list[5][0]
-    fd3_tsne = tsne_list[6][0]
-    fd4_tsne = tsne_list[7][0]
-    loc1_tsne = tsne_list[8][0]
-    loc2_tsne = tsne_list[9][0]
-    loc3_tsne = tsne_list[10][0]
-    loc4_tsne = tsne_list[11][0]
-    dia1_tsne = tsne_list[12][0]
-    dia2_tsne = tsne_list[13][0]
-    dia3_tsne = tsne_list[14][0]
-    dia4_tsne = tsne_list[15][0]
+    fd_tsne = tsne_list.cpu().numpy()
 
-    np.savetxt(save_path + 'global1_tsne.txt', global1_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'global2_tsne.txt', global2_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'global3_tsne.txt', global3_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'global4_tsne.txt', global4_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'fd1_tsne.txt', fd1_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'fd2_tsne.txt', fd2_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'fd3_tsne.txt', fd3_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'fd4_tsne.txt', fd4_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'loc1_tsne.txt', loc1_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'loc2_tsne.txt', loc2_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'loc3_tsne.txt', loc3_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'loc4_tsne.txt', loc4_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'dia1_tsne.txt', dia1_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'dia2_tsne.txt', dia2_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'dia3_tsne.txt', dia3_tsne, fmt='%.5f', delimiter=',')
-    np.savetxt(save_path + 'dia4_tsne.txt', dia4_tsne, fmt='%.5f', delimiter=',')
+    np.savetxt(save_path + 'fd_tsne.txt', fd_tsne, fmt='%.5f', delimiter=',')
     np.savetxt(save_path + 'labels_tsne.txt', labels.cpu().numpy(), fmt='%.5f', delimiter=',')
 
-def prediction(weights_path, con_matrix_path, acc_path, tsne_save_path):
+def prediction(weights_path, con_matrix_path, acc_path, tsne_save_path, sne=False):
     #定义参数
     N = 4 #编码器个数
     input_dim = 1024
     seq_len = 16 #句子长度
     hidden_size = 128
-    batch_size = 64
+    #batch_size = 64
+    batch_size = 814 #tsne
 
     test_path = r'F:\PyCharmWorkSpace\MultiFD\data\cu_data\test\test.csv'
     test_dataset = MyDataset(test_path, 'fd')
     test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False, drop_last=True)
 
     #定义模型
-    model = RegLSTM(input_dim=input_dim, input_size=seq_len, hidden_size=hidden_size, hidden_num_layers=N)
+    model = RegLSTM(input_dim=input_dim, input_size=seq_len, hidden_size=hidden_size, hidden_num_layers=N, sne=sne)
     model.to(device)
 
     # load model weights
@@ -77,9 +44,10 @@ def prediction(weights_path, con_matrix_path, acc_path, tsne_save_path):
     for datas, labels in test_bar:
         datas, labels = datas.to(device), labels.to(device)
         with torch.no_grad():
-            outputs = model(datas.float().to(device))
+            #outputs = model(datas.float().to(device))
 
-            #tsne_data(tsne_list, labels, tsne_save_path)
+            outputs, tsne_list = model(datas.float().to(device))
+            tsne_data(tsne_list, labels, tsne_save_path)
 
         acc_fd.append((outputs.argmax(dim=-1) == labels).float().mean())
         #生成混淆矩阵
@@ -98,16 +66,24 @@ def prediction(weights_path, con_matrix_path, acc_path, tsne_save_path):
 
 
 if __name__ == '__main__':
-    group_index = 1
-    for i in range(5):
-        weights_path = "result/result_cu/group{}/exp0{}/model.pth".format(group_index, i + 1)
-        con_matrix_path = "result/result_cu/group{}/exp0{}/confusion_matrix.txt".format(group_index, i + 1)
-        acc_path = "result/result_cu/group{}/exp0{}/test_result.txt".format(group_index, i + 1)
-        tsne_save_path = "result/result_cu/group{}/exp0{}/".format(group_index, i + 1)
-        prediction(weights_path, con_matrix_path, acc_path, tsne_save_path)
+    # group_index = 4
+    # for i in range(5):
+    #     weights_path = "result/result_cu_noisy/group{}/exp0{}/model.pth".format(group_index, i + 1)
+    #     con_matrix_path = "result/result_cu_noisy/group{}/exp0{}/confusion_matrix.txt".format(group_index, i + 1)
+    #     acc_path = "result/result_cu_noisy/group{}/exp0{}/test_result.txt".format(group_index, i + 1)
+    #     tsne_save_path = "result/result_cu_noisy/group{}/exp0{}/".format(group_index, i + 1)
+    #     prediction(weights_path, con_matrix_path, acc_path, tsne_save_path)
 
     # weights_path = "result/result_own/group{}/exp0{}/model.pth".format(26, 1)
     # con_matrix_path = "result/result_own/group{}/exp0{}/confusion_matrix.txt".format(26, 1)
     # acc_path = "result/result_own/group{}/exp0{}/test_result.txt".format(26, 1)
     # tsne_save_path = "result/result_own/group{}/exp0{}/".format(26, 1)
     # prediction(weights_path, con_matrix_path, acc_path, tsne_save_path)
+
+    # t-sne
+    group_index = 1
+    weights_path = "result/result_cu/group{}/exp0{}/model.pth".format(group_index, 1)
+    con_matrix_path = "result/result_cu/group{}/exp0{}/confusion_matrix.txt".format(group_index, 1)
+    acc_path = "result/result_cu/group{}/exp0{}/test_result.txt".format(group_index, 1)
+    tsne_save_path = "result/result_cu/group{}/exp0{}/".format(group_index, 1)
+    prediction(weights_path, con_matrix_path, acc_path, tsne_save_path, sne=True)

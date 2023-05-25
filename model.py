@@ -4,8 +4,10 @@ from einops import rearrange
 from einops.layers.torch import Rearrange
 
 class RegLSTM(nn.Module):
-    def __init__(self, input_dim, input_size, hidden_size, hidden_num_layers):
+    def __init__(self, input_dim, input_size, hidden_size, hidden_num_layers, sne=False):
         super(RegLSTM, self).__init__()
+
+        self.sne = sne
         # 嵌入
         self.to_patch_embedding = self.to_patch_embedding = nn.Sequential(
             Rearrange('b 1 (n d) -> b 1 n d', n=input_size),
@@ -24,5 +26,10 @@ class RegLSTM(nn.Module):
         x = x.squeeze(1)
         x, (ht, ct) = self.rnn(x)
         x = rearrange(x, 'b s l -> b (s l)')
-        x = self.reg(x)
-        return x
+        if self.sne:
+            y = x
+            x = self.reg(x)
+            return x, y
+        else:
+            x = self.reg(x)
+            return x

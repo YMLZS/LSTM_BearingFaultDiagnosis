@@ -104,71 +104,64 @@ def estimate(estimate_path):
     fs.close()
 
 
-def tsne():
+def tsne(data_tsne, label, class_num):
     # 读取数据
-    global1_tsne = np.loadtxt('result/result_cu/group0_tsne/exp02/global4_tsne.txt', delimiter=',')
-    labels = np.loadtxt('result/result_cu/group0_tsne/exp02/labels_tsne.txt', delimiter=',')
-    features = torch.Tensor(global1_tsne)
-    labels = torch.Tensor(labels[:, 0])
-
-    # matrix = features[0]
-    # for i in range(1, len(features)):
-    #     matrix = torch.vstack((matrix, features[i]))
-    # label = labels[0]
-    # for i in range(1, len(labels)):
-    #     label = torch.vstack((label, labels[i]))
-    # label = label[:, 0]
-    #
-    # features = matrix
-    # labels = label
+    features = torch.Tensor(data_tsne)
+    labels = torch.Tensor(label)
 
     # t-SNE的最终结果的降维与可视化
     ts = manifold.TSNE(n_components=2, init='pca', random_state=0)
-    x_ts = ts.fit_transform(features) # [num, 2]
+    x_ts = ts.fit_transform(features)  # [num, 2]
     x_min, x_max = x_ts.min(0), x_ts.max(0)
     x_final = (x_ts - x_min) / (x_max - x_min)
 
-    True_labels = labels.reshape((-1, 1))
-    S_data = np.hstack((x_final, True_labels))  # 将降维后的特征与相应的标签拼接在一起
-    S_data = pd.DataFrame({'x': S_data[:, 0], 'y': S_data[:, 1], 'label': S_data[:, 2]}) # [num, 3]
+    true_labels = labels.reshape((-1, 1))
+    s_data = np.hstack((x_final, true_labels))  # 将降维后的特征与相应的标签拼接在一起
+    s_data = pd.DataFrame({'x': s_data[:, 0], 'y': s_data[:, 1], 'label': s_data[:, 2]})  # [num, 3]
 
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(7, 7))
     # 设置散点形状
-    maker = ['o', 's', '^', 's', 'p', '*', '<', '>', 'D', 'd', 'h', 'H']
+    maker = ['.', 'o', 's', '^', 's', 'p', '*', '<', '>', 'D', 'd', 'h', 'H']
+
     # 设置散点颜色
-    colors = ['#e38c7a', '#656667', '#99a4bc', 'cyan', 'blue', 'lime', 'r', 'violet', 'm', 'peru', 'olivedrab',
-              'hotpink']
+    colors = ['#104680', '#B0A875', '#FC8002', '#369F2D', '#EE4431', '#614099', '#1663A9', '#B9181A', '#B4B4D5',
+              '#36ACA2']
+
     # 图例名称
-    Label_Com = ['a', 'b', 'c', 'd']
+    label_fd = ['Norm', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9']
+
     # 设置字体格式
     font1 = {'family': 'Times New Roman',
              'weight': 'bold',
              'size': 32,
              }
-    for index in range(10):  # 假设总共有三个类别，类别的表示为0,1,2
-        x = S_data.loc[S_data['label'] == index]['x']
-        y = S_data.loc[S_data['label'] == index]['y']
-        plt.scatter(x, y, cmap='brg', s=100, marker=maker[index], c=colors[index], edgecolors=colors[index], alpha=0.65)
+
+    for index in range(class_num):  # 假设总共有class_num个类别
+        x = s_data.loc[s_data['label'] == index]['x']
+        y = s_data.loc[s_data['label'] == index]['y']
+        plt.scatter(x, y, cmap='brg', s=100, marker=maker[0], c=colors[index], edgecolors=colors[index], alpha=1)
         plt.xticks([])  # 去掉横坐标值
         plt.yticks([])  # 去掉纵坐标值
 
-    plt.title('(a)', fontsize=32, fontweight='normal', pad=20)
     plt.show()
 
 
 if __name__ == '__main__':
+    # group_index = 1
+    # for i in range(5):
+    #     txt_path = 'result/result_cu/group{}/exp0{}/confusion_matrix.txt'.format(group_index, i + 1)
+    #     jpg_path = 'result/result_cu/group{}/exp0{}/confusion_matrix.jpg'.format(group_index, i + 1)
+    #     confusion_matrix(txt_path, jpg_path)
+    #
+    #     train_result_path = 'result/result_cu/group{}/exp0{}/train_result.txt'.format(group_index, i + 1)
+    #     val_result_path = 'result/result_cu/group{}/exp0{}/val_result.txt'.format(group_index, i + 1)
+    #     #draw(train_result_path, val_result_path, epochs=100)
+    # estimate_path = 'result/result_cu/group{}'.format(group_index)
+    # estimate(estimate_path)
+
+    # tsne
     group_index = 1
-    for i in range(5):
-        txt_path = 'result/result_cu/group{}/exp0{}/confusion_matrix.txt'.format(group_index, i + 1)
-        jpg_path = 'result/result_cu/group{}/exp0{}/confusion_matrix.jpg'.format(group_index, i + 1)
-        confusion_matrix(txt_path, jpg_path)
+    fd_tsne = np.loadtxt('result/result_cu/group{}/exp0{}/fd_tsne.txt'.format(group_index, 1), delimiter=',')
+    labels = np.loadtxt('result/result_cu/group{}/exp0{}/labels_tsne.txt'.format(group_index, 1), delimiter=',')
+    tsne(fd_tsne, labels, 10)
 
-        train_result_path = 'result/result_cu/group{}/exp0{}/train_result.txt'.format(group_index, i + 1)
-        val_result_path = 'result/result_cu/group{}/exp0{}/val_result.txt'.format(group_index, i + 1)
-        #draw(train_result_path, val_result_path, epochs=100)
-    estimate_path = 'result/result_cu/group{}'.format(group_index)
-    estimate(estimate_path)
-
-    # train_result_path = 'result/result_own_noisy/group{}/exp0{}/train_result.txt'.format(2, 1)
-    # val_result_path = 'result/result_own_noisy/group{}/exp0{}/val_result.txt'.format(2, 1)
-    # draw(train_result_path, val_result_path, epochs=100)
