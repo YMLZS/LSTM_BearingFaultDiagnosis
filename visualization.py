@@ -147,21 +147,21 @@ def tsne(data_tsne, label, class_num):
 
 
 if __name__ == '__main__':
-    # group_index = 1
-    # for i in range(5):
-    #     txt_path = 'result/result_cu/group{}/exp0{}/confusion_matrix.txt'.format(group_index, i + 1)
-    #     jpg_path = 'result/result_cu/group{}/exp0{}/confusion_matrix.jpg'.format(group_index, i + 1)
-    #     confusion_matrix(txt_path, jpg_path)
-    #
-    #     train_result_path = 'result/result_cu/group{}/exp0{}/train_result.txt'.format(group_index, i + 1)
-    #     val_result_path = 'result/result_cu/group{}/exp0{}/val_result.txt'.format(group_index, i + 1)
-    #     #draw(train_result_path, val_result_path, epochs=100)
-    # estimate_path = 'result/result_cu/group{}'.format(group_index)
-    # estimate(estimate_path)
+    group_index = 1
+    for i in range(5):
+        txt_path = 'result/result_cu/group{}/exp0{}/confusion_matrix.txt'.format(group_index, i + 1)
+        jpg_path = 'result/result_cu/group{}/exp0{}/confusion_matrix.jpg'.format(group_index, i + 1)
+        confusion_matrix(txt_path, jpg_path)
+
+        train_result_path = 'result/result_cu/group{}/exp0{}/train_result.txt'.format(group_index, i + 1)
+        val_result_path = 'result/result_cu/group{}/exp0{}/val_result.txt'.format(group_index, i + 1)
+        #draw(train_result_path, val_result_path, epochs=100)
+    estimate_path = 'result/result_cu/group{}'.format(group_index)
+    estimate(estimate_path)
 
     # tsne
-    group_index = 1
-    fd_tsne = np.loadtxt('result/result_cu/group{}/exp0{}/fd_tsne.txt'.format(group_index, 1), delimiter=',')
-    labels = np.loadtxt('result/result_cu/group{}/exp0{}/labels_tsne.txt'.format(group_index, 1), delimiter=',')
-    tsne(fd_tsne, labels, 10)
+    # group_index = 4
+    # fd_tsne = np.loadtxt('result/result_cu_noisy/group{}/exp0{}/fd_tsne.txt'.format(group_index, 1), delimiter=',')
+    # labels = np.loadtxt('result/result_cu_noisy/group{}/exp0{}/labels_tsne.txt'.format(group_index, 1), delimiter=',')
+    # tsne(fd_tsne, labels, 10)
 
