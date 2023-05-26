@@ -10,7 +10,6 @@ if __name__ == '__main__':
     input_dim = 1024
     seq_len = 16 #句子长度
     hidden_size = 128
-    lr = 6E-5 #学习率
 
     net = RegLSTM(input_dim=input_dim, input_size=seq_len, hidden_size=hidden_size, hidden_num_layers=N)
     device = torch.device("cuda:0")
