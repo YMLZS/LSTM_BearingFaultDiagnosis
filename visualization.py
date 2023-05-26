@@ -59,7 +59,7 @@ def confusion_matrix(txt_path, jpg_path):
     # 加载混淆矩阵
     con_matrix = np.loadtxt(txt_path, delimiter=',')
     # 标签
-    classes = ['type0', 'type1', 'type2', 'type3', 'type4', 'type5', 'type6', 'type7', 'type8', 'type9']
+    classes = ['Norm', 'B07', 'B14', 'B21', 'IR07', 'IR14', 'IR21', 'OR07', 'OR14', 'OR21']
     # 标签的个数
     classNamber = 10  # 分类数量
     # 按行进行归一化到(0,1)之间
@@ -68,7 +68,7 @@ def confusion_matrix(txt_path, jpg_path):
     con_matrix = con_matrix.numpy()
 
     plt.imshow(con_matrix, interpolation='nearest', cmap=plt.cm.GnBu)  # 按照像素显示出矩阵,可设置像素背景颜色
-    plt.title('confusion_matrix')
+    plt.title('LSTM')
     plt.colorbar()
     tick_marks = np.arange(len(classes))
     plt.xticks(tick_marks, classes, rotation=-45)
@@ -147,16 +147,16 @@ def tsne(data_tsne, label, class_num):
 
 
 if __name__ == '__main__':
-    group_index = 1
+    group_index = 4
     for i in range(5):
-        txt_path = 'result/result_cu/group{}/exp0{}/confusion_matrix.txt'.format(group_index, i + 1)
-        jpg_path = 'result/result_cu/group{}/exp0{}/confusion_matrix.jpg'.format(group_index, i + 1)
+        txt_path = 'result/result_cu_noisy/group{}/exp0{}/confusion_matrix.txt'.format(group_index, i + 1)
+        jpg_path = 'result/result_cu_noisy/group{}/exp0{}/confusion_matrix.jpg'.format(group_index, i + 1)
         confusion_matrix(txt_path, jpg_path)
 
-        train_result_path = 'result/result_cu/group{}/exp0{}/train_result.txt'.format(group_index, i + 1)
-        val_result_path = 'result/result_cu/group{}/exp0{}/val_result.txt'.format(group_index, i + 1)
+        train_result_path = 'result/result_cu_noisy/group{}/exp0{}/train_result.txt'.format(group_index, i + 1)
+        val_result_path = 'result/result_cu_noisy/group{}/exp0{}/val_result.txt'.format(group_index, i + 1)
         #draw(train_result_path, val_result_path, epochs=100)
-    estimate_path = 'result/result_cu/group{}'.format(group_index)
+    estimate_path = 'result/result_cu_noisy/group{}'.format(group_index)
     estimate(estimate_path)
 
     # tsne
